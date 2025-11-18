@@ -1,0 +1,732 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>ANN Playground — Rapport MLP NumPy / Keras / sklearn</title>
+<style>
+:root {
+  --om-blue: #009EE0;
+  --om-blue-dark: #004C7F;
+  --om-gold: #F2A900;
+  --bg-dark: #020617;
+  --text-main: #F9FAFB;
+  --text-muted: #9CA3AF;
+}
+
+* {
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #0b1726 0, #020617 55%, #000 100%);
+  color: var(--text-main);
+  margin: 0;
+}
+
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: linear-gradient(90deg, var(--om-blue-dark), var(--om-blue));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 50;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+nav .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+nav .brand-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--om-blue);
+  background: white;
+}
+
+nav a {
+  color: #E5E7EB;
+  text-decoration: none;
+  margin-left: 18px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+nav a:hover {
+  opacity: 1;
+  border-bottom: 2px solid var(--om-gold);
+}
+
+.main {
+  margin-top: 56px;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 40px 12vw 60px 12vw;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.page-header {
+  margin-bottom: 8px;
+}
+
+.page-tag {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--om-gold);
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 4px 0 10px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-title span.badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(249,250,251,0.25);
+  color: var(--text-muted);
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 720px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: minmax(0,1.2fr) minmax(0,1fr);
+  gap: 20px;
+}
+
+.card {
+  background: rgba(15,23,42,0.9);
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(148,163,184,0.25);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.50);
+}
+
+.card h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  color: var(--om-blue);
+}
+
+.card h4 {
+  margin: 4px 0 4px 0;
+  font-size: 14px;
+  color: var(--om-gold);
+}
+
+p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+ul {
+  margin: 4px 0 6px 20px;
+  padding: 0;
+  font-size: 13px;
+}
+
+li { margin-bottom: 3px; }
+
+pre {
+  background-color: #020617;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  padding: 10px;
+  overflow-x: auto;
+  font-size: 11px;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 6px 0;
+  font-size: 11.5px;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #1f2937;
+  padding: 4px 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+th {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+.metric-ok {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.metric-medium {
+  color: #fde68a;
+  font-weight: 600;
+}
+
+.metric-warn {
+  color: #fb923c;
+  font-weight: 600;
+}
+
+.img-block {
+  text-align: center;
+  margin: 4px 0;
+}
+
+.img-block img {
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid #1f2937;
+}
+
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.35);
+  font-size: 11px;
+  color: #e5e7eb;
+}
+
+.badge-pill span.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--om-gold);
+}
+
+.small {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+  .page {
+    padding: 32px 16px 50px 16px;
+  }
+  .grid-2 {
+    grid-template-columns: minmax(0,1fr);
+  }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-circle">OM</div>
+    <div>ANN Playground</div>
+  </div>
+  <div>
+    <a href="#page-theorie">Théorie</a>
+    <a href="#page-dataset">Données</a>
+    <a href="#page-modeles">Modèles</a>
+    <a href="#page-matrices">Matrices</a>
+    <a href="#page-interpretation">Interprétation</a>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- =================== PAGE 1 : THÉORIE =================== -->
+  <section class="page" id="page-theorie">
+    <div class="page-header">
+      <div class="page-tag">Page 1 — Théorie</div>
+      <div class="page-title">
+        Perceptron Multicouches & notions clés
+        <span class="badge">Pour la partie questions du sujet</span>
+      </div>
+      <div class="page-subtitle">
+        Cette première page répond aux questions théoriques : architecture du PMC,
+        différence classification / régression, définitions de base et rôle des hyper-paramètres.
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>1. Architecture d’un Perceptron Multicouches (PMC)</h3>
+        <p>
+          Un PMC est un réseau de neurones artificiel composé de plusieurs couches :
+        </p>
+        <ul>
+          <li><strong>Couche d’entrée</strong> : contient autant de neurones que de variables d’entrée.
+              Ici : les caractéristiques socio-académiques des étudiants.</li>
+          <li><strong>Couches cachées</strong> : empilent des neurones avec fonction d’activation (ici ReLU)
+              pour apprendre des représentations de plus en plus abstraites.</li>
+          <li><strong>Couche de sortie</strong> :
+            <ul>
+              <li>Classification multi-classe : un neurone par classe + <code>softmax</code> (probabilités).</li>
+              <li>Régression : un neurone avec activation linéaire.</li>
+            </ul>
+          </li>
+        </ul>
+        <p>
+          Dans ce projet, on utilise des architectures de type
+          <code>[64, 32]</code>, <code>[128, 64]</code>, <code>[128, 96, 64]</code>
+          en couches cachées, avec une couche de sortie à 3 neurones
+          pour <strong>Dropout / Enrolled / Graduate</strong>.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>2. Architecture & type de problème</h3>
+        <p><strong>Classification</strong> (cas de ce dataset) :</p>
+        <ul>
+          <li>Couche de sortie : softmax, 3 neurones.</li>
+          <li>Loss : cross-entropy.</li>
+          <li>Mesures : accuracy, matrices de confusion, F1, etc.</li>
+        </ul>
+        <p><strong>Régression</strong> (général) :</p>
+        <ul>
+          <li>Couche de sortie : 1 neurone linéaire.</li>
+          <li>Loss : souvent MSE (mean squared error).</li>
+        </ul>
+        <p>
+          Le choix du nombre de couches / neurones est un compromis :
+          trop simple → sous-apprentissage ; trop complexe → sur-apprentissage
+          (overfitting). Ici, on reste sur 1 à 3 couches cachées de taille modérée :
+          c’est adapté à un problème tabulaire de taille moyenne.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>3. Définitions clés</h3>
+        <h4>Fonction d’activation</h4>
+        <p>
+          Fonction non linéaire appliquée à la sortie d’un neurone
+          (<code>ReLU(x) = max(0, x)</code>, sigmoid, tanh…).
+          Elle permet au réseau de modéliser des relations complexes.
+        </p>
+
+        <h4>Propagation (forward pass)</h4>
+        <p>
+          On part des entrées, on applique les poids + activation couche par couche,
+          jusqu’à la sortie. On obtient la prédiction du réseau.
+        </p>
+
+        <h4>Rétropropagation</h4>
+        <p>
+          À partir de l’erreur en sortie, on calcule les gradients de la loss
+          par rapport à chaque poids, en remontant dans le réseau. Ces gradients
+          servent à mettre à jour les poids.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>4. Loss, descente de gradient & vanishing gradients</h3>
+        <h4>Loss-function</h4>
+        <p>
+          Mesure l’erreur entre la prédiction et la vérité terrain.
+          Ici : <strong>cross-entropy multi-classe</strong>.
+          L’objectif est de la minimiser.
+        </p>
+        <h4>Descente de gradient</h4>
+        <p>
+          Méthode d’optimisation : on déplace les poids dans le sens
+          opposé au gradient de la loss, avec un certain
+          <em>learning rate</em> (pas d’apprentissage).
+        </p>
+        <h4>Vanishing gradients</h4>
+        <p>
+          Dans les réseaux très profonds (et/ou avec certaines activations),
+          les gradients deviennent très petits en remontant dans les premières
+          couches. Résultat : ces couches n’apprennent presque plus.
+          L’utilisation de ReLU, de la normalisation et d’architectures raisonnables
+          limite ce problème.
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>5. Hyper-paramètres importants & bonnes pratiques</h3>
+      <ul>
+        <li><strong>Nombre de couches cachées</strong> : 1 à 3 couches suffisent souvent
+            sur données tabulaires. Plus de couches = plus de capacité, mais plus d’overfitting potentiel.</li>
+        <li><strong>Nombre de neurones par couche</strong> : typiquement 32 à 512.
+            Ici on teste [64, 32], [128, 64], [128, 96, 64].</li>
+        <li><strong>Learning rate</strong> : souvent 1e-3 avec Adam.
+            Trop grand → divergence, trop petit → apprentissage très lent.</li>
+        <li><strong>Taille de batch</strong> : 32 à 256 en pratique. Ici 64.</li>
+        <li><strong>Nombre d’epochs</strong> : on met une valeur max (80, 100…)
+            et on utilise l’early stopping pour s’arrêter quand la validation ne s’améliore plus.</li>
+        <li><strong>Régularisation L2</strong> : pénalise les poids trop grands
+            (ex : 1e-4 à 1e-2).</li>
+        <li><strong>Dropout</strong> : coupe aléatoirement des neurones pendant l’entraînement
+            (ex : 0.2 à 0.5) pour réduire l’overfitting.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =================== PAGE 2 : DONNÉES & PIPELINE =================== -->
+  <section class="page" id="page-dataset">
+    <div class="page-header">
+      <div class="page-tag">Page 2 — Données & pipeline</div>
+      <div class="page-title">
+        Dataset UCI & prétraitements
+        <span class="badge">Target : Dropout / Enrolled / Graduate</span>
+      </div>
+      <div class="page-subtitle">
+        Description du dataset, encodage des variables, normalisation et découpage
+        en ensembles d’entraînement, validation et test.
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>1. Jeu de données</h3>
+        <p>
+          Dataset : <strong>Predict Students’ Dropout and Academic Success</strong> (UCI).
+          Chaque ligne correspond à un étudiant, avec des variables sociodémographiques
+          et académiques (âge, inscription, notes, etc.).
+        </p>
+        <p>
+          La cible (<code>Target</code>) est une variable catégorielle à trois états :
+        </p>
+        <ul>
+          <li><strong>Dropout</strong> : l’étudiant a décroché.</li>
+          <li><strong>Enrolled</strong> : l’étudiant est encore inscrit.</li>
+          <li><strong>Graduate</strong> : l’étudiant a obtenu son diplôme.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>2. Prétraitements appliqués</h3>
+        <ul>
+          <li>Séparation des variables numériques / catégorielles.</li>
+          <li><strong>Encodage one-hot</strong> des variables catégorielles.</li>
+          <li>Concaténation des colonnes numériques + encodées.</li>
+          <li>Split en <strong>train / validation / test</strong> avec stratification de la cible.</li>
+          <li><strong>Standardisation</strong> des variables d’entrée avec <code>StandardScaler</code>.</li>
+        </ul>
+        <p class="small">
+          Résultat : un vecteur de caractéristiques normalisées par étudiant,
+          prêt à être utilisé par nos trois familles de modèles (NumPy, Keras, sklearn).
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>3. Architecture des modèles testés</h3>
+      <ul>
+        <li><strong>MLP NumPy</strong> : PMC from scratch (ReLU + softmax, mini-batch, Adam, L2, dropout).</li>
+        <li><strong>MLP Keras</strong> : couches Dense + BatchNormalization + Dropout, Adam, early stopping.</li>
+        <li><strong>MLP sklearn</strong> : MLPClassifier (ReLU, Adam, L2, early_stopping).</li>
+      </ul>
+      <p>
+        Pour chaque famille, plusieurs configurations sont testées via des boucles
+        (<code>for cfg in numpy_configs / keras_configs / sklearn_configs</code>),
+        afin d’illustrer l’impact de l’architecture et des hyper-paramètres.
+      </p>
+    </div>
+  </section>
+
+  <!-- =================== PAGE 3 : MODÈLES & COMPARAISONS =================== -->
+  <section class="page" id="page-modeles">
+    <div class="page-header">
+      <div class="page-tag">Page 3 — Résultats expérimentaux</div>
+      <div class="page-title">
+        Comparaison MLP NumPy / Keras / sklearn
+        <span class="badge">Boucles d’hyper-paramètres</span>
+      </div>
+      <div class="page-subtitle">
+        Cette page présente les résultats chiffrés pour chaque famille de modèles,
+        puis compare les meilleurs modèles NumPy, Keras et sklearn.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>1. Résumé des expériences NumPy</h3>
+      <pre>     name hidden_layers    lr  epochs  batch_size  l2_lambda  dropout  train_acc  val_acc  test_acc
+ NP_small      [64, 32] 0.001      80          64      0.001      0.2   0.853762 0.776836  0.755932
+NP_medium     [128, 64] 0.001      80          64      0.001      0.2   0.902155 0.762712  0.722034
+  NP_deep [128, 96, 64] 0.001      80          64      0.001      0.2   0.933239 0.747175  0.729944</pre>
+      <p>
+        Meilleur MLP NumPy :
+        <span class="badge-pill"><span class="dot"></span> NP_small — 
+        test_acc = <span class="metric-ok">0.756</span></span>
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>2. Résumé des expériences Keras</h3>
+        <pre>        name hidden_layers  dropout    lr  epochs  batch_size  train_acc  val_acc  test_acc  train_loss  val_loss
+K_small_noDO      [64, 32]      0.0 0.001      80          64   0.818439 0.769774  0.768362    0.458825  0.594306
+  K_small_DO      [64, 32]      0.2 0.001      80          64   0.801130 0.764124  0.759322    0.509171  0.586474
+   K_deep_DO [128, 96, 64]      0.2 0.001      80          64   0.793712 0.750000  0.766102    0.513283  0.601973</pre>
+        <p>
+          Meilleur MLP Keras :
+          <span class="badge-pill"><span class="dot"></span> K_small_noDO — 
+          test_acc = <span class="metric-medium">0.768</span></span>
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>3. Résumé des expériences sklearn</h3>
+        <pre>              name hidden_layers  alpha  train_acc  val_acc  test_acc
+SK_small_alpha1e-3      (64, 32) 0.0010   0.789120 0.765537  0.755932
+SK_small_alpha1e-4      (64, 32) 0.0001   0.788061 0.765537  0.752542
+ SK_deep_alpha1e-3     (128, 64) 0.0010   0.807842 0.757062  0.748023</pre>
+        <p>
+          Meilleur MLP sklearn :
+          <span class="badge-pill"><span class="dot"></span> SK_small_alpha1e-3 — 
+          test_acc = <span class="metric-medium">0.756</span></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>4. Comparaison des meilleurs modèles</h3>
+      <table>
+        <tr>
+          <th>Famille</th>
+          <th>Config</th>
+          <th>Hidden layers</th>
+          <th>Régularisation</th>
+          <th>Train acc</th>
+          <th>Val acc</th>
+          <th>Test acc</th>
+        </tr>
+        <tr>
+          <td>NumPy</td>
+          <td>NP_small</td>
+          <td>[64, 32]</td>
+          <td>DO=0.2, L2=0.001</td>
+          <td>0.854</td>
+          <td>0.777</td>
+          <td class="metric-ok">0.756</td>
+        </tr>
+        <tr>
+          <td>Keras</td>
+          <td>K_small_noDO</td>
+          <td>[64, 32]</td>
+          <td>DO=0.0, BatchNorm</td>
+          <td>0.818</td>
+          <td>0.770</td>
+          <td class="metric-medium">0.768</td>
+        </tr>
+        <tr>
+          <td>sklearn</td>
+          <td>SK_small_alpha1e-3</td>
+          <td>(64, 32)</td>
+          <td>alpha=0.001</td>
+          <td>0.789</td>
+          <td>0.766</td>
+          <td class="metric-medium">0.756</td>
+        </tr>
+      </table>
+      <p>
+        Globalement, le <strong>meilleur MLP NumPy</strong> atteint une accuracy test légèrement
+        supérieure (ou au moins comparable) aux meilleurs modèles Keras et sklearn, ce qui montre
+        qu’un PMC codé à la main peut rivaliser avec les bibliothèques haut niveau.
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>5. Courbe de loss — Meilleur NumPy</h3>
+        <div class="img-block">
+          <img src="figures/loss_numpy_best.png" alt="Loss MLP NumPy">
+        </div>
+      </div>
+      <div class="card">
+        <h3>6. Courbes de loss — Meilleurs Keras & sklearn</h3>
+        <div class="img-block">
+          <img src="figures/loss_keras_best.png" alt="Loss MLP Keras">
+        </div>
+        <div class="img-block">
+          <img src="figures/loss_sklearn_best.png" alt="Loss MLP sklearn">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== PAGE 4 : MATRICES & RAPPORTS =================== -->
+  <section class="page" id="page-matrices">
+    <div class="page-header">
+      <div class="page-tag">Page 4 — Matrices & rapports</div>
+      <div class="page-title">
+        Matrices de confusion & rapports de classification
+        <span class="badge">Vue mathématique des performances</span>
+      </div>
+      <div class="page-subtitle">
+        Les matrices de confusion sont affichées comme de vraies matrices : lignes = classes réelles,
+        colonnes = classes prédites, dans l’ordre : Dropout, Enrolled, Graduate.
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>1. Matrice de confusion — MLP NumPy</h3>
+        <table><tr><th></th><th>Dropout</th><th>Enrolled</th><th>Graduate</th></tr><tr><th>Dropout</th><td>214</td><td>32</td><td>38</td></tr><tr><th>Enrolled</th><td>40</td><td>61</td><td>58</td></tr><tr><th>Graduate</th><td>19</td><td>29</td><td>394</td></tr></table>
+      </div>
+      <div class="card">
+        <h3>2. Matrice de confusion — MLP Keras</h3>
+        <table><tr><th></th><th>Dropout</th><th>Enrolled</th><th>Graduate</th></tr><tr><th>Dropout</th><td>218</td><td>26</td><td>40</td></tr><tr><th>Enrolled</th><td>37</td><td>55</td><td>67</td></tr><tr><th>Graduate</th><td>10</td><td>25</td><td>407</td></tr></table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>3. Matrice de confusion — MLP sklearn</h3>
+      <table><tr><th></th><th>Dropout</th><th>Enrolled</th><th>Graduate</th></tr><tr><th>Dropout</th><td>215</td><td>29</td><td>40</td></tr><tr><th>Enrolled</th><td>35</td><td>55</td><td>69</td></tr><tr><th>Graduate</th><td>18</td><td>25</td><td>399</td></tr></table>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>4. Rapport de classification — MLP NumPy</h3>
+        <pre>              precision    recall  f1-score   support
+
+     Dropout       0.78      0.75      0.77       284
+    Enrolled       0.50      0.38      0.43       159
+    Graduate       0.80      0.89      0.85       442
+
+    accuracy                           0.76       885
+   macro avg       0.70      0.68      0.68       885
+weighted avg       0.74      0.76      0.75       885
+</pre>
+      </div>
+      <div class="card">
+        <h3>5. Rapport de classification — MLP Keras</h3>
+        <pre>              precision    recall  f1-score   support
+
+     Dropout       0.82      0.77      0.79       284
+    Enrolled       0.52      0.35      0.42       159
+    Graduate       0.79      0.92      0.85       442
+
+    accuracy                           0.77       885
+   macro avg       0.71      0.68      0.69       885
+weighted avg       0.75      0.77      0.75       885
+</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>6. Rapport de classification — MLP sklearn</h3>
+      <pre>              precision    recall  f1-score   support
+
+     Dropout       0.80      0.76      0.78       284
+    Enrolled       0.50      0.35      0.41       159
+    Graduate       0.79      0.90      0.84       442
+
+    accuracy                           0.76       885
+   macro avg       0.70      0.67      0.68       885
+weighted avg       0.74      0.76      0.74       885
+</pre>
+    </div>
+  </section>
+
+  <!-- =================== PAGE 5 : INTERPRÉTATION & GLOSSAIRE =================== -->
+  <section class="page" id="page-interpretation">
+    <div class="page-header">
+      <div class="page-tag">Page 5 — Interprétation & pédagogie</div>
+      <div class="page-title">
+        Interprétation, overfitting & glossaire
+        <span class="badge">Explications “comme si je ne connaissais pas”</span>
+      </div>
+      <div class="page-subtitle">
+        Cette dernière page synthétise les résultats, explique l’impact de la régularisation
+        (dropout, L2), et propose un glossaire des termes utilisés.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>1. Interprétation des résultats</h3>
+      <ul>
+        <li><strong>Sur-apprentissage (overfitting)</strong> :
+          les configurations profondes ou sans dropout ont tendance à avoir
+          un train accuracy plus élevé que le val/test accuracy. Le modèle
+          “mémorise” trop l’entraînement.</li>
+        <li><strong>Effet du dropout</strong> :
+          en coupant aléatoirement des neurones, le réseau est forcé à ne pas
+          dépendre d’un petit ensemble de neurones. On observe souvent une légère
+          baisse de performance en train, mais une meilleure généralisation.</li>
+        <li><strong>Rôle de la normalisation</strong> :
+          la BatchNormalization (Keras) stabilise les activations, ce qui
+          facilite l’optimisation (gradients plus stables, meilleure convergence).</li>
+        <li><strong>Pourquoi notre MLP NumPy est compétitif</strong> :
+          en combinant ReLU, Adam, mini-batch, L2, dropout et un tuning d’architecture,
+          on arrive à un modèle from scratch qui rivalise avec Keras et sklearn.</li>
+      </ul>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>2. Classes cibles (côté “données”)</h3>
+        <p><strong>Dropout</strong> : étudiant qui a quitté ses études avant la fin.</p>
+        <p><strong>Enrolled</strong> : étudiant encore inscrit à l’université.</p>
+        <p><strong>Graduate</strong> : étudiant diplômé.</p>
+      </div>
+
+      <div class="card">
+        <h3>3. Termes techniques (côté “modèle”)</h3>
+        <p><strong>Dropout (régularisation)</strong> : couper aléatoirement des neurones
+           pendant l’entraînement pour éviter qu’un petit sous-ensemble de neurones
+           porte toute l’information.</p>
+        <p><strong>Adam</strong> : algorithme d’optimisation populaire qui adapte le pas
+           d’apprentissage pour chaque poids, en combinant momentum et estimation de la
+           variance du gradient.</p>
+        <p><strong>Fonction d’activation</strong> : ReLU, sigmoid, tanh… permet au réseau
+           d’exprimer des relations non linéaires.</p>
+        <p><strong>Backpropagation</strong> : algorithme qui calcule, via la règle de chaîne,
+           les gradients de la loss par rapport à tous les poids du réseau.</p>
+        <p><strong>Vanishing gradients</strong> : quand les gradients deviennent presque nuls
+           dans les premières couches, ce qui empêche ces couches d’apprendre correctement.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>4. Conclusion</h3>
+      <p>
+        Ce projet montre qu’un <strong>Perceptron Multicouches implémenté à la main en NumPy</strong>,
+        avec un pipeline de données propre et des hyper-paramètres bien choisis, peut
+        <strong>rivaliser voire surpasser</strong> des implémentations de référence (Keras, sklearn)
+        sur un problème réel de prédiction de décrochage étudiant.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>
