@@ -213,16 +213,12 @@ Globalement, le **meilleur MLP NumPy** atteint une accuracy test légèrement su
 
 ### 5. Courbe de loss — Meilleur NumPy
 
-_Image d’origine : `figures/loss_numpy_best.png` (non intégrée ici)._
+![Logo du projet](figures/loss_numpy_best.png)
 
 ### 6. Courbes de loss — Meilleurs Keras & sklearn
 
-_Images d’origine :_
-
-- `figures/loss_keras_best.png`
-- `figures/loss_sklearn_best.png`
-
-*(Les images peuvent être réinsérées manuellement avec la syntaxe Markdown si besoin.)*
+- ![Logo du projet](figures/loss_keras_best.png)
+- ![Logo du projet](figures/loss_sklearn_best.png)
 
 ---
 
