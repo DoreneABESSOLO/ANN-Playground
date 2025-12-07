@@ -1,0 +1,10 @@
+matplotlib
+numpy
+openpyxl
+pandas
+prince
+scikit-learn
+scipy
+seaborn
+SQLAlchemy
+ucimlrepo
